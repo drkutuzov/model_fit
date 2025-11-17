@@ -100,11 +100,10 @@ def pars_from_fit(fit):
 
 ### Plotting ###
 
-def plot_fit(fit, figsize=(8, 6), xlabel=None, ylabel=None, markersize=None, elinewidth=0.75):
+def plot_fit(fit, figsize=(8, 6), xlabel=None, ylabel=None, markersize=None, elinewidth=0.75, xlim=None, ylim=None):
 
     fig, [ax_fit, ax_res] = plt.subplots(2, 1, sharex=True, figsize=figsize)
 
-    # ax_fit.plot(fit['x'], fit['y'], c='k', ls='', marker='.', markersize=markersize)
     ax_fit.errorbar(fit['x'], fit['y'], fit['y_std'], c='k', ls='', marker='.', markersize=markersize, elinewidth=elinewidth)
     ax_fit.plot(fit['x_high_res'], fit['y_fit_high_res'], c='r')
 
@@ -116,6 +115,10 @@ def plot_fit(fit, figsize=(8, 6), xlabel=None, ylabel=None, markersize=None, eli
     ax_res.set_xlabel(xlabel)
     ax_res.set_ylabel('Standardized residuals (dim. less)')
     ax_res.axhline(y=0, ls='--', lw=1, c='k')
+
+    ax_res.set_xlim(xlim)
+    ax_res.set_ylim(ylim)
     
     plt.tight_layout()
+
 

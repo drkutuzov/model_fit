@@ -11,7 +11,6 @@ def S0(x, xo, s, a, vtau):
 
 
 def S(x, xi, wi, s, a, vtau):
-    x = xi - x
     return S0(x, xi - wi/2, s, a, vtau) - S0(x, xi + wi/2, s, a, vtau)
 
 
@@ -39,7 +38,6 @@ def math_micro_5peaks(x, Ig, I1, I2, I3, I4, I5, w1, w2, w3, w4, w5, x1, l1, l2,
     right = S(x, x5 + l, w5, s, a, vtau)
     
     return Ig + (I1 - Ig)*left + (I5 - Ig)*right + np.sum(np.array([(Ii - Ig)*S(x, xi, wi, s, a, vtau) for Ii, xi, wi in z]), axis=0)
-    
 
 ### Expressions for spectral analysis ###
 
