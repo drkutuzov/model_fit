@@ -20,10 +20,10 @@ def S_(x, xi, wi, s, a, vtau):
     return S(x, xi - l, wi, s, a, vtau) + S(x, xi, wi, s, a, vtau) + S(x, xi + l, wi, s, a, vtau)
 
 
-def math_micro(x, Ig1, Ig2, I1, I2, w1, w2, x1, x2, s, a, vtau):
-    l = x2 - x1
-    term1 = (1 - np.heaviside(x - (x1 + l/2), 0.5))*Ig1 + (I1 - Ig1)*S_(x, x1, w1, s, a, vtau)
-    term2 = np.heaviside(x - (x1 + l/2), 0.5)*Ig2 + (I2 - Ig2)*S_(x, x2, w2, s, a, vtau)
+def math_micro(x, Ig1, Ig2, I1, I2, w1, w2, xc, l, s, a, vtau):
+    x1, x2 = xc - l/2, xc + l/2
+    term1 = (1 - np.heaviside(x - xc, 0.5))*Ig1 + (I1 - Ig1)*S_(x, x1, w1, s, a, vtau)
+    term2 = np.heaviside(x - xc, 0.5)*Ig2 + (I2 - Ig2)*S_(x, x2, w2, s, a, vtau)
     
     return term1 + term2
 

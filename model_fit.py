@@ -42,7 +42,7 @@ def fit(f, x, y, y_std, p0, **kwg):
     return dict(pars=pars, x=x, y=y, y_std=y_std, y_fit=y_fit, resid_norm=resid_norm, x_high_res=x_high_res, y_fit_high_res=y_fit_high_res)
 
 
-def fit_with_bootstrap(f, x, y, y_std, p0, mc_trials, **kwg):
+def fit_with_bootstrap(f, x, y, y_std, p0, n_trials, **kwg):
     """
     Fits y(x) +/- y_std data using scipy.optimize.curve_fit. Returns parameters with uncertainties and the resulting fit.
     
@@ -63,22 +63,24 @@ def fit_with_bootstrap(f, x, y, y_std, p0, mc_trials, **kwg):
     """
 
     fit0 = fit(f, x, y, y_std, p0, **kwg)
-
+    pars = pars_from_fit(fit0)
     ### Fitted y ###
     y_fit = fit0['y_fit']
+    
     dx = x[1] - x[0]
     x_high_res = np.arange(x[0], x[-1] + 1e-2*dx, 1e-2*dx)
-    y_fit_high_res = f(x_high_res, *p)
+    y_fit_high_res = f(x_high_res, *pars)
     ###----------------------------------------------------
 
     resid_norm = (y - y_fit)/y_std
     
-    y_sim = np.random.normal(loc=fit0['fit'], scale=y_std, size=(n_trials, len(x)))
+    y_sim = np.random.normal(loc=y_fit, scale=y_std, size=(n_trials, len(x)))
     
-    pars_mc_full = np.array([nominal_values(fit(f, x, y_sim_i, y_std, nominal_values(fit0['pars']), **kwg)['pars']) for y_sim_i in y_sim])
+    pars_mc_full = np.array([pars_from_fit(fit(f, x, y_sim_i, y_std, pars, **kwg)) for y_sim_i in y_sim])
 
-    pars_mc = {name: val for name, val in zip(list(inspect.signature(f).parameters.keys())[1:], 
-                                           uarray(np.mean(pars_mc_full, axis=0), np.std(pars_mc_full, axis=0)))}
+    pars_mean = np.mean(pars_mc_full, axis=0)
+    pars_std = np.std(pars_mc_full, axis=0)
+    pars_mc = {name: val for name, val in zip(list(inspect.signature(f).parameters.keys())[1:], uarray(pars_mean, pars_std))}
 
     return dict(pars=pars_mc, x=x, y=y, y_std=y_std, y_fit=y_fit, resid_norm=resid_norm, x_high_res=x_high_res, y_fit_high_res=y_fit_high_res)
 
@@ -89,6 +91,11 @@ def print_params(pars):
 
     for name, val in pars.items():
         print(f'{name} = {val}')
+
+
+def pars_from_fit(fit):
+    
+    return [p.nominal_value for p in fit['pars'].values()]
 
 
 ### Plotting ###
@@ -111,3 +118,4 @@ def plot_fit(fit, figsize=(8, 6), xlabel=None, ylabel=None, markersize=None, eli
     ax_res.axhline(y=0, ls='--', lw=1, c='k')
     
     plt.tight_layout()
+
